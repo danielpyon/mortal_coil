@@ -10,12 +10,36 @@ class Board:
     def set_pos(self, x, y):
         self.pos = (x, y)
 
-    def solve(self, path):
+    def solve(self, path=''):
         '''
         Returns the solution if it exists, otherwise None.
-        Start the search at (x, y)
+        Starts search at self.pos
         '''
-        pass
+        x, y = self.pos
+        L, R = self.valid_pos(x, y - 1), self.valid_pos(x, y + 1)
+        U, D = self.valid_pos(x - 1, y), self.valid_pos(x + 1, y)
+        if not (L or R or U or D):
+            return None
+
+        for direction in ['U', 'R', 'D', 'L']:
+            moved = self.move(direction)
+            
+            if self.valid_sol():
+                return path
+            if len(moved) == 0:
+                return None
+            
+            if self.solve(path + direction):
+                return path + direction
+
+            for (a, b) in moved:
+                self.board[a, b] = False
+            self.pos = moved[0]
+
+        return False
+
+    def valid_sol(self):
+        return self.board.all()
 
     def in_bounds(self, x, y):
         h, w  = self.board.shape
@@ -28,7 +52,12 @@ class Board:
         x, y = self.pos
         h, w = self.board.shape
         if not self.valid_pos(x, y):
-            return
+            return []
+        L, R = self.valid_pos(x, y - 1), self.valid_pos(x, y + 1)
+        U, D = self.valid_pos(x - 1, y), self.valid_pos(x + 1, y)
+        if not eval(direction):
+            return []
+
         # coords to update
         if direction == 'L':
             # y, y - 1, y - 2, ... , 0
@@ -40,11 +69,17 @@ class Board:
         else:
             coords = zip(range(x, -1, -1), [y] * (x + 1))
 
+        moved = []
         for (a, b) in coords:
             if not self.valid_pos(a, b):
                 # stop
                 break
             self.board[a, b] = True
+            moved.append((a, b))
+            self.pos = a, b
+
+        # return which positions were affected for backtracking
+        return moved
 
 if __name__ == '__main__':
     # n rows, m cols
@@ -60,7 +95,9 @@ if __name__ == '__main__':
         state[x, y] = True
 
     game = Board(state)
-    game.set_pos(2, 0)
-    game.move('R')
+    game.set_pos(3, 1)
+    path = game.solve()
 
     print(game.board)
+
+    print(path)
