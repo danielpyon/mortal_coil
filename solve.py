@@ -9,58 +9,43 @@ class Board:
 
     def set_pos(self, x, y):
         self.pos = (x, y)
+        self.board[x, y] = True
 
     def solve(self, path=''):
-        '''
-        Returns the solution if it exists, otherwise None.
-        Starts search at self.pos
-        '''
         x, y = self.pos
-        L, R = self.valid_pos(x, y - 1), self.valid_pos(x, y + 1)
-        U, D = self.valid_pos(x - 1, y), self.valid_pos(x + 1, y)
-        if not (L or R or U or D):
-            return None
+        if self.valid_sol():
+            return path
 
         for direction in ['U', 'R', 'D', 'L']:
-            moved = self.move(direction)
-            
-            if self.valid_sol():
-                return path
+            orig, moved = self.move(direction)
+            print(self.pos)
+            print(self.board)
+            print()
             if len(moved) == 0:
-                return None
-            
-            if self.solve(path + direction):
-                return path + direction
+                continue
 
-            for (a, b) in moved:
-                self.board[a, b] = False
-            self.pos = moved[0]
+            sol = self.solve(path + direction)
+            if len(sol) > 0:
+                return sol
+            else:
+                for (a, b) in moved:
+                    self.board[a, b] = False
+                self.pos = orig
 
-        return False
+        # dead end
+        return ''
 
     def valid_sol(self):
         return self.board.all()
 
-    def in_bounds(self, x, y):
-        h, w  = self.board.shape
-        return 0 <= x < h and 0 <= y < w
-
     def valid_pos(self, x, y):
-        return self.in_bounds(x, y) and not self.board[x, y]
+        h, w = self.board.shape
+        return 0 <= x < h and 0 <= y < w and not self.board[x, y]
 
     def move(self, direction):
-        x, y = self.pos
         h, w = self.board.shape
-        if not self.valid_pos(x, y):
-            return []
-        L, R = self.valid_pos(x, y - 1), self.valid_pos(x, y + 1)
-        U, D = self.valid_pos(x - 1, y), self.valid_pos(x + 1, y)
-        if not eval(direction):
-            return []
-
-        # coords to update
+        x, y = self.pos
         if direction == 'L':
-            # y, y - 1, y - 2, ... , 0
             coords = zip([x] * (y + 1), range(y, -1, -1))
         elif direction == 'D':
             coords = zip(range(x, w), [y] * (w - x))
@@ -71,15 +56,16 @@ class Board:
 
         moved = []
         for (a, b) in coords:
+            if (a, b) == (x, y):
+                continue
             if not self.valid_pos(a, b):
-                # stop
                 break
             self.board[a, b] = True
             moved.append((a, b))
             self.pos = a, b
 
         # return which positions were affected for backtracking
-        return moved
+        return (x, y), moved
 
 if __name__ == '__main__':
     # n rows, m cols
@@ -96,8 +82,6 @@ if __name__ == '__main__':
 
     game = Board(state)
     game.set_pos(3, 1)
+
     path = game.solve()
-
-    print(game.board)
-
     print(path)
