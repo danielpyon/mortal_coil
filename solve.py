@@ -26,10 +26,6 @@ class Board:
         for direction in ['U', 'R', 'D', 'L']:
             orig, moved = self.move(direction)
             
-            print(self.board)
-            print(self.pos)
-            print()
-            
             if len(moved) == 0:
                 continue
 
@@ -76,6 +72,18 @@ class Board:
         # return which positions were affected for backtracking
         return (x, y), moved
 
+def solve(state):
+    n, m = state.shape
+    game = Board(state)
+    for i in range(n):
+        for j in range(m):
+            game.set_pos(i, j)
+            path = game.solve()
+            game.reset()
+            if len(path) > 0:
+                return (i, j) , path
+    return None
+
 if __name__ == '__main__':
     # n rows, m cols
     n, m = 4, 4
@@ -89,8 +97,4 @@ if __name__ == '__main__':
         x, y = block
         state[x, y] = True
 
-    game = Board(state)
-    game.set_pos(3, 1)
-
-    path = game.solve()
-    print(path)
+    print(solve(state))

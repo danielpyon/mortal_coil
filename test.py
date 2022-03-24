@@ -1,4 +1,4 @@
-from solve import Board
+from solve import Board, solve
 import numpy as np
 
 if __name__ == '__main__':
@@ -14,8 +14,4 @@ if __name__ == '__main__':
         x, y = block
         state[x, y] = True
     
-    game = Board(state)
-    game.set_pos(2, 4)
-    path = game.solve()
-    game.reset()
-    print(path)
+    print(solve(state))
