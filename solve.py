@@ -77,6 +77,8 @@ def solve(state):
     game = Board(state)
     for i in range(n):
         for j in range(m):
+            if state[i, j]:
+                continue
             game.set_pos(i, j)
             path = game.solve()
             game.reset()
