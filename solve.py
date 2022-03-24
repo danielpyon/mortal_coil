@@ -4,12 +4,19 @@ class Board:
     def __init__(self, state):
         # board tracks "visited" for each pos
         self.board = state
+        # copy for reset
+        self.__orig = np.copy(state)
+        
         # current position for solve
         self.pos = (0, 0)
 
     def set_pos(self, x, y):
         self.pos = (x, y)
         self.board[x, y] = True
+
+    def reset(self):
+        self.board = np.copy(self.__orig)
+        self.pos = (0, 0)
 
     def solve(self, path=''):
         x, y = self.pos
@@ -18,9 +25,11 @@ class Board:
 
         for direction in ['U', 'R', 'D', 'L']:
             orig, moved = self.move(direction)
-            print(self.pos)
+            
             print(self.board)
+            print(self.pos)
             print()
+            
             if len(moved) == 0:
                 continue
 
@@ -50,7 +59,7 @@ class Board:
         elif direction == 'D':
             coords = zip(range(x, w), [y] * (w - x))
         elif direction == 'R':
-            coords = zip([x] * (h - y), range(y, h))
+            coords = zip([x] * (w - y), range(y, w))
         else:
             coords = zip(range(x, -1, -1), [y] * (x + 1))
 
